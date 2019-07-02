@@ -77,7 +77,7 @@ extension URLSession {
     
     let task = dataTask(with: url) { data, _, error in
       if let error = error {
-        promise.reject(with: appError)
+        promise.reject(with: error)
       } else {
         promise.resolve(with: data ?? Data())
       }
