@@ -7,19 +7,19 @@
 
 import Foundation
 
-class Promise<Value>: Future<Value> {
-  init(value: Value? = nil) {
+public class Promise<Value>: Future<Value> {
+  public init(value: Value? = nil) {
     super.init()
     if let value = value {
       result = .success(value)
     }
   }
   
-  func resolve(with value: Value) {
+  public func resolve(with value: Value) {
     result = .success(value)
   }
   
-  func reject(with error: Error) {
+  public func reject(with error: Error) {
     result = .failure(error)
   }
 }

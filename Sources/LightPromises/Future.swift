@@ -8,7 +8,7 @@
 
 import Foundation
 
-class Future<Value>: Hashable {
+public class Future<Value>: Hashable {
   let id = UUID()
   typealias T = Value
   internal var result: Result<Value, Error>? {
@@ -16,7 +16,7 @@ class Future<Value>: Hashable {
   }
   private lazy var callbacks = [(Result<Value, Error>) -> Void]()
   
-  func observe(with callback: @escaping (Result<Value, Error>) -> Void) {
+  public func observe(with callback: @escaping (Result<Value, Error>) -> Void) {
     callbacks.append(callback)
     result.map(callback)
   }
@@ -27,10 +27,10 @@ class Future<Value>: Hashable {
     }
   }
   
-  func hash(into hasher: inout Hasher) {
+  public func hash(into hasher: inout Hasher) {
     hasher.combine(id)
   }
-  static func == (lhs: Future<Value>, rhs: Future<Value>) -> Bool {
+  public static func == (lhs: Future<Value>, rhs: Future<Value>) -> Bool {
     return lhs.id == rhs.id
   }
 }
@@ -38,7 +38,7 @@ class Future<Value>: Hashable {
 // MARK: - Initialization
 
 extension Future {
-  convenience init( value: @escaping (Promise<Value>) -> Void) {
+  public convenience init( value: @escaping (Promise<Value>) -> Void) {
     self.init()
     let promise = Promise<Value>()
     value(promise)
@@ -49,7 +49,7 @@ extension Future {
 
 extension Future {
   
-  func `catch`(_ block: @escaping (Error) -> Void) -> Void {
+  public func `catch`(_ block: @escaping (Error) -> Void) -> Void {
     switch result {
     case .failure(let error)?:
       block(error)
@@ -62,7 +62,7 @@ extension Future {
 // MARK: - Observing value
 
 extension Future {
-  func flatMap<NextValue>(with closure: @escaping (Value) throws -> Future<NextValue>) -> Future<NextValue> {
+  public func flatMap<NextValue>(with closure: @escaping (Value) throws -> Future<NextValue>) -> Future<NextValue> {
     let promise = Promise<NextValue>()
     
     observe { result in
@@ -90,7 +90,7 @@ extension Future {
     return promise
   }
   
-  func transformed<NextValue>(with closure: @escaping (Value) throws -> NextValue) -> Future<NextValue> {
+  public func transformed<NextValue>(with closure: @escaping (Value) throws -> NextValue) -> Future<NextValue> {
     return flatMap { value in
       return try Promise(value: closure(value))
     }
@@ -117,7 +117,7 @@ extension URLSession {
 
 extension Future {
   
-  func and<T>(with nextFuture: Future<T>) -> Future<(Value,T)> {
+  public func and<T>(with nextFuture: Future<T>) -> Future<(Value,T)> {
     let promise = Promise<(Value,T)>()
     var currentValue: Value?
     var nextValue: T?
