@@ -35,6 +35,32 @@ class Future<Value>: Hashable {
   }
 }
 
+// MARK: - Initialization
+
+extension Future {
+  convenience init( value: @escaping (Promise<Value>) -> Void) {
+    self.init()
+    let promise = Promise<Value>()
+    value(promise)
+  }
+}
+
+// MARK: - Error handling
+
+extension Future {
+  
+  func `catch`(_ block: @escaping (Error) -> Void) -> Void {
+    switch result {
+    case .failure(let error)?:
+      block(error)
+    default: break
+    }
+  }
+  
+}
+
+// MARK: - Observing value
+
 extension Future {
   func flatMap<NextValue>(with closure: @escaping (Value) throws -> Future<NextValue>) -> Future<NextValue> {
     let promise = Promise<NextValue>()
