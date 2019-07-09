@@ -32,16 +32,7 @@ public class Future<Value>: Hashable {
   public static func == (lhs: Future<Value>, rhs: Future<Value>) -> Bool {
     return lhs.id == rhs.id
   }
-}
-
-// MARK: - Initialization
-
-extension Future {
-  public convenience init( value: @escaping (Promise<Value>) -> Void) {
-    self.init()
-    let promise = Promise<Value>()
-    value(promise)
-  }
+  
 }
 
 // MARK: - Error handling
@@ -49,11 +40,14 @@ extension Future {
 extension Future {
   
   public func `catch`(_ block: @escaping (Error) -> Void) -> Void {
-    switch result {
-    case .failure(let error)?:
-      block(error)
-    default: break
-    }
+      observe { result in
+        print(result)
+        switch result {
+        case .failure(let error):
+          block(error)
+        default: break
+        }
+      }
   }
   
 }
@@ -62,7 +56,7 @@ extension Future {
 
 extension Future {
   public func flatMap<NextValue>(with closure: @escaping (Value) throws -> Future<NextValue>) -> Future<NextValue> {
-    return Future<NextValue> { [weak self] promise in
+    return Promise<NextValue> { [weak self] promise in
       
       guard let self = self else { return }
       self.observe { result in
@@ -95,17 +89,18 @@ extension Future {
     }
   }
   
-  public func finally(with closure: @escaping (Value) -> Void) {
-    observe { result in
+  public func finally(with closure: @escaping (Value) -> Void) -> Future<Value> {
+    self.observe { result in
       switch result {
       case .success(let value):
         closure(value)
       default: break
       }
     }
+    return self
   }
   
-  public func `do`(with closure: @escaping (Value) -> Void) { finally(with: closure) }
+  public func `done`(with closure: @escaping (Value) -> Void) -> Future<Value> { return finally(with: closure) }
   
  
   public func always(with closure: @escaping () -> Void) {

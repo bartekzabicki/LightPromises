@@ -23,3 +23,13 @@ public class Promise<Value>: Future<Value> {
     result = .failure(error)
   }
 }
+
+
+// MARK: - Initialization
+
+extension Promise {
+  public convenience init( value: @escaping (Promise<Value>) -> Void) {
+    self.init()
+    value(self)
+  }
+}
