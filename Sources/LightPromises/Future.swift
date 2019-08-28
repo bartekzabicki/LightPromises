@@ -41,7 +41,6 @@ extension Future {
   
   public func `catch`(_ block: @escaping (Error) -> Void) -> Void {
       observe { result in
-        print(result)
         switch result {
         case .failure(let error):
           block(error)
